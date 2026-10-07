@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 8 Maths Mastery: 45 Linear Equation Challenges</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    .math-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    .active-card {
+      animation: pulse-subtle 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- Navigation / Top Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <i class="fa-solid fa-square-root-variable text-lg text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Algebra Quest
+            <span class="text-xs bg-indigo-500/20 text-indigo-300 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/30">Year 8 KS3</span>
+          </h1>
+          <p class="text-xs text-slate-400">45 Linear Equations with Brackets</p>
+        </div>
+      </div>
+
+      <!-- Quick Stats & Controls -->
+      <div class="flex items-center gap-3 sm:gap-6">
+        <div class="flex items-center gap-2">
+          <div class="text-right hidden sm:block">
+            <div class="text-xs text-slate-400 font-medium">Score</div>
+            <div class="text-base font-bold text-amber-400" id="headerScore">0 / 45</div>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <i class="fa-solid fa-star"></i>
+          </div>
+        </div>
+
+        <button id="resetBtn" title="Reset all saved progress" class="text-xs text-slate-400 hover:text-rose-400 p-2 transition-colors flex items-center gap-1 rounded-md hover:bg-slate-800/80">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span class="hidden md:inline">Reset</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Overall Progress Bar -->
+    <div class="w-full bg-slate-800 h-1.5 overflow-hidden">
+      <div id="topProgressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 flex flex-col lg:flex-row gap-6 w-full">
+
+    <!-- Left Column: Question Card & Solver -->
+    <div class="flex-1 flex flex-col gap-4">
+
+      <!-- Section Indicator & Quick Nav -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span id="tierBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            Section A: Foundational
+          </span>
+          <span class="text-xs text-slate-400" id="currentSectionDesc">Single brackets</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-semibold">
+          <span class="text-slate-400">Question</span>
+          <span class="text-indigo-400 text-base" id="qNumberDisplay">1</span>
+          <span class="text-slate-600">/ 45</span>
+        </div>
+      </div>
+
+      <!-- Main Interactive Question Stage -->
+      <div class="bg-gradient-to-b from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[380px]">
+        <!-- Watermark Background Decal -->
+        <div class="absolute -right-8 -bottom-8 text-8xl font-black text-slate-800/20 select-none pointer-events-none math-font" id="watermarkNum">
+          #01
+        </div>
+
+        <div>
+          <!-- Tags / Context -->
+          <div class="flex items-center justify-between mb-4">
+            <span id="qTag" class="text-xs tracking-wider uppercase font-semibold text-slate-400">Equation</span>
+            <div id="statusPill" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+              Not Answered
+            </div>
+          </div>
+
+          <!-- Problem Expression -->
+          <div class="my-6">
+            <h2 id="qPrompt" class="text-sm sm:text-base text-slate-300 mb-2 font-normal">Solve for the variable:</h2>
+            <div id="qMath" class="text-2xl sm:text-4xl font-bold math-font tracking-tight text-white py-3 px-4 bg-slate-950/60 rounded-2xl border border-slate-800/80 inline-block">
+              2(x + 4) = 14
+            </div>
+            <p id="qHintNote" class="text-xs text-slate-400 mt-3 italic"></p>
+          </div>
+        </div>
+
+        <!-- Input & Verification Area -->
+        <div class="space-y-4 pt-4 border-t border-slate-800/80">
+          <form id="answerForm" class="flex flex-col sm:flex-row gap-3 items-stretch">
+            <div class="relative flex-1">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 math-font text-lg font-bold" id="varPrefix">x =</span>
+              <input 
+                type="text" 
+                id="userInput" 
+                autocomplete="off" 
+                placeholder="e.g. 5, -2, 11/6, or 3.5" 
+                class="w-full bg-slate-950/80 border-2 border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-white rounded-2xl pl-14 pr-4 py-3.5 text-lg math-font transition-all outline-none"
+              >
+            </div>
+            <button 
+              type="submit" 
+              id="submitBtn" 
+              class="px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 text-base cursor-pointer"
+            >
+              <span>Check Answer</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </form>
+
+          <!-- Feedback Toast / Box -->
+          <div id="feedbackBox" class="hidden rounded-2xl p-4 border transition-all text-sm flex items-start gap-3">
+            <div id="feedbackIcon" class="mt-0.5 text-lg"></div>
+            <div class="flex-1">
+              <div id="feedbackTitle" class="font-bold text-base"></div>
+              <div id="feedbackMessage" class="text-xs sm:text-sm mt-0.5 text-slate-300"></div>
+              <div id="stepSolution" class="mt-3 p-3 bg-slate-950/70 rounded-xl math-font text-xs text-slate-300 hidden border border-slate-800"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Previous / Next Controls -->
+        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-800/40 text-sm">
+          <button id="prevBtn" class="flex items-center gap-2 text-slate-400 hover:text-white px-3 py-2 rounded-xl hover:bg-slate-800/60 transition disabled:opacity-30 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+            <span>Previous</span>
+          </button>
+          <button id="toggleSolutionBtn" class="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium">
+            Show Step-by-Step Working
+          </button>
+          <button id="nextBtn" class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 px-3 py-2 rounded-xl hover:bg-indigo-950/40 transition disabled:opacity-30 disabled:pointer-events-none font-semibold">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Helpful Guide / Rules Strip -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-floppy-disk"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-slate-200">Auto-Saved Always</div>
+            <div class="text-slate-400 text-[11px]">Leave anytime, return seamlessly</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-divide"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-slate-200">Fractions & Decimals</div>
+            <div class="text-slate-400 text-[11px]">Accepts 11/6, 1.83, or 8.5</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-slate-200">Tier Challenges</div>
+            <div class="text-slate-400 text-[11px]">1-15 Mild &bull; 16-30 Spicy &bull; 31-45 Hot</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: 45-Question Navigation Matrix -->
+    <div class="w-full lg:w-80 flex flex-col gap-4">
+      <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 flex flex-col h-full max-h-[620px]">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm tracking-wide text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-grip text-indigo-400"></i>
+            Question Navigator
+          </h3>
+          <span class="text-xs bg-slate-800 px-2.5 py-0.5 rounded-full text-slate-300 font-mono" id="matrixCompletion">0/45</span>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center justify-between text-[11px] text-slate-400 pb-3 border-b border-slate-800 mb-3">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-emerald-500 inline-block"></span> Done</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-rose-500 inline-block"></span> Review</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-indigo-600 inline-block"></span> Active</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-md bg-slate-800 border border-slate-700 inline-block"></span> Open</span>
+        </div>
+
+        <!-- Matrix Grid -->
+        <div class="overflow-y-auto pr-1 hide-scrollbar flex-1 space-y-4" id="matrixContainer">
+          <!-- Filled by JavaScript -->
+        </div>
+
+        <!-- Jump to First Incomplete Button -->
+        <button id="resumeNextBtn" class="mt-4 w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-700/60 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-forward-step"></i>
+          <span>Jump to next unsolved</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Complete Completion Modal (Triggered at 45/45) -->
+  <div id="finishModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl relative">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-indigo-500 flex items-center justify-center text-3xl text-white shadow-xl shadow-indigo-500/30 mb-5">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      <h3 class="text-2xl font-black text-white tracking-tight">Algebra Mastery Achieved!</h3>
+      <p class="text-slate-300 text-sm mt-2">You completed all 45 Linear Equations with Brackets across all KS3 Year 8 difficulty tiers.</p>
+      
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 my-6 text-left space-y-2">
+        <div class="flex justify-between text-xs text-slate-400">
+          <span>Final Score</span>
+          <span class="font-bold text-amber-400 text-sm" id="modalFinalScore">45 / 45</span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-400">
+          <span>Accuracy Status</span>
+          <span class="font-semibold text-emerald-400">100% Complete</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('finishModal').classList.add('hidden')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+          Review Answers
+        </button>
+        <button onclick="resetAllProgress()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
+          Restart Quest
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 45 Questions Database ---
+    const QUESTIONS = [
+      // SECTION A: FOUNDATIONAL (1 - 15)
+      { id: 1, section: 'A', title: 'Foundational', equation: '2(x + 4) = 14', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 2x + 8 = 14 \nSubtract 8: 2x = 6 \nDivide by 2: x = 3' },
+      { id: 2, section: 'A', title: 'Foundational', equation: '3(x + 5) = 24', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 3x + 15 = 24 \nSubtract 15: 3x = 9 \nDivide by 3: x = 3' },
+      { id: 3, section: 'A', title: 'Foundational', equation: '4(x - 2) = 16', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 4x - 8 = 16 \nAdd 8: 4x = 24 \nDivide by 4: x = 6' },
+      { id: 4, section: 'A', title: 'Foundational', equation: '5(x - 3) = 25', answers: ['8'], prompt: 'Solve for x:', steps: 'Expand: 5x - 15 = 25 \nAdd 15: 5x = 40 \nDivide by 5: x = 8' },
+      { id: 5, section: 'A', title: 'Foundational', equation: '6(2x + 1) = 42', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 12x + 6 = 42 \nSubtract 6: 12x = 36 \nDivide by 12: x = 3' },
+      { id: 6, section: 'A', title: 'Foundational', equation: '3(3x - 2) = 21', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 9x - 6 = 21 \nAdd 6: 9x = 27 \nDivide by 9: x = 3' },
+      { id: 7, section: 'A', title: 'Foundational', equation: '4(2x - 5) = 28', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 8x - 20 = 28 \nAdd 20: 8x = 48 \nDivide by 8: x = 6' },
+      { id: 8, section: 'A', title: 'Foundational', equation: '2(4x + 3) = 38', answers: ['4'], prompt: 'Solve for x:', steps: 'Expand: 8x + 6 = 38 \nSubtract 6: 8x = 32 \nDivide by 8: x = 4' },
+      { id: 9, section: 'A', title: 'Foundational', equation: '7(2x - 1) = 35', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 14x - 7 = 35 \nAdd 7: 14x = 42 \nDivide by 14: x = 3' },
+      { id: 10, section: 'A', title: 'Foundational', equation: '8(3x + 2) = 64', answers: ['2'], prompt: 'Solve for x:', steps: 'Expand: 24x + 16 = 64 \nSubtract 16: 24x = 48 \nDivide by 24: x = 2' },
+      { id: 11, section: 'A', title: 'Foundational', equation: '5(4 - x) = 15', answers: ['1'], prompt: 'Solve for x:', steps: 'Expand: 20 - 5x = 15 \nSubtract 20: -5x = -5 \nDivide by -5: x = 1' },
+      { id: 12, section: 'A', title: 'Foundational', equation: '3(7 - 2x) = 9', answers: ['2'], prompt: 'Solve for x:', steps: 'Expand: 21 - 6x = 9 \nSubtract 21: -6x = -12 \nDivide by -6: x = 2' },
+      { id: 13, section: 'A', title: 'Foundational', equation: '-2(x + 6) = 8', answers: ['-10'], prompt: 'Solve for x:', steps: 'Expand: -2x - 12 = 8 \nAdd 12: -2x = 20 \nDivide by -2: x = -10' },
+      { id: 14, section: 'A', title: 'Foundational', equation: '-3(2x - 5) = 27', answers: ['-2'], prompt: 'Solve for x:', steps: 'Expand: -6x + 15 = 27 \nSubtract 15: -6x = 12 \nDivide by -6: x = -2' },
+      { id: 15, section: 'A', title: 'Foundational', equation: '-4(3x - 1) = -32', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: -12x + 4 = -32 \nSubtract 4: -12x = -36 \nDivide by -12: x = 3' },
+
+      // SECTION B: INTERMEDIATE (16 - 30)
+      { id: 16, section: 'B', title: 'Intermediate', equation: '2(x + 5) = x + 16', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 2x + 10 = x + 16 \nSubtract x: x + 10 = 16 \nSubtract 10: x = 6' },
+      { id: 17, section: 'B', title: 'Intermediate', equation: '3(x - 2) = x + 12', answers: ['9'], prompt: 'Solve for x:', steps: 'Expand: 3x - 6 = x + 12 \nSubtract x: 2x - 6 = 12 \nAdd 6: 2x = 18 \nDivide by 2: x = 9' },
+      { id: 18, section: 'B', title: 'Intermediate', equation: '4(x + 3) = 2x + 22', answers: ['5'], prompt: 'Solve for x:', steps: 'Expand: 4x + 12 = 2x + 22 \nSubtract 2x: 2x + 12 = 22 \nSubtract 12: 2x = 10 \nDivide by 2: x = 5' },
+      { id: 19, section: 'B', title: 'Intermediate', equation: '5(x - 1) = 3x + 11', answers: ['8'], prompt: 'Solve for x:', steps: 'Expand: 5x - 5 = 3x + 11 \nSubtract 3x: 2x - 5 = 11 \nAdd 5: 2x = 16 \nDivide by 2: x = 8' },
+      { id: 20, section: 'B', title: 'Intermediate', equation: '6(x + 2) = 4x + 24', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 6x + 12 = 4x + 24 \nSubtract 4x: 2x + 12 = 24 \nSubtract 12: 2x = 12 \nDivide by 2: x = 6' },
+      { id: 21, section: 'B', title: 'Intermediate', equation: '2(2x + 7) = x + 23', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 4x + 14 = x + 23 \nSubtract x: 3x + 14 = 23 \nSubtract 14: 3x = 9 \nDivide by 3: x = 3' },
+      { id: 22, section: 'B', title: 'Intermediate', equation: '3(3x - 4) = 4x + 8', answers: ['4'], prompt: 'Solve for x:', steps: 'Expand: 9x - 12 = 4x + 8 \nSubtract 4x: 5x - 12 = 8 \nAdd 12: 5x = 20 \nDivide by 5: x = 4' },
+      { id: 23, section: 'B', title: 'Intermediate', equation: '2(x + 4) = 3(x - 1)', answers: ['11'], prompt: 'Solve for x:', steps: 'Expand: 2x + 8 = 3x - 3 \nSubtract 2x: 8 = x - 3 \nAdd 3: x = 11' },
+      { id: 24, section: 'B', title: 'Intermediate', equation: '4(x - 3) = 2(x + 5)', answers: ['11'], prompt: 'Solve for x:', steps: 'Expand: 4x - 12 = 2x + 10 \nSubtract 2x: 2x - 12 = 10 \nAdd 12: 2x = 22 \nDivide by 2: x = 11' },
+      { id: 25, section: 'B', title: 'Intermediate', equation: '5(2x + 1) = 3(3x + 4)', answers: ['7'], prompt: 'Solve for x:', steps: 'Expand: 10x + 5 = 9x + 12 \nSubtract 9x: x + 5 = 12 \nSubtract 5: x = 7' },
+      { id: 26, section: 'B', title: 'Intermediate', equation: '3(2x - 5) = 2(2x + 1)', answers: ['8.5', '17/2'], prompt: 'Solve for x (decimal or fraction):', steps: 'Expand: 6x - 15 = 4x + 2 \nSubtract 4x: 2x - 15 = 2 \nAdd 15: 2x = 17 \nDivide by 2: x = 8.5 (or 17/2)' },
+      { id: 27, section: 'B', title: 'Intermediate', equation: '4(3x - 2) = 5(2x + 2)', answers: ['9'], prompt: 'Solve for x:', steps: 'Expand: 12x - 8 = 10x + 10 \nSubtract 10x: 2x - 8 = 10 \nAdd 8: 2x = 18 \nDivide by 2: x = 9' },
+      { id: 28, section: 'B', title: 'Intermediate', equation: '2(x + 3) + 3(x + 1) = 24', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 2x + 6 + 3x + 3 = 24 \nCollect terms: 5x + 9 = 24 \nSubtract 9: 5x = 15 \nDivide by 5: x = 3' },
+      { id: 29, section: 'B', title: 'Intermediate', equation: '4(2x - 1) + 2(x + 5) = 36', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 8x - 4 + 2x + 10 = 36 \nCollect: 10x + 6 = 36 \nSubtract 6: 10x = 30 \nDivide by 10: x = 3' },
+      { id: 30, section: 'B', title: 'Intermediate', equation: '3(3x + 2) + 4(x - 1) = 41', answers: ['3'], prompt: 'Solve for x:', steps: 'Expand: 9x + 6 + 4x - 4 = 41 \nCollect: 13x + 2 = 41 \nSubtract 2: 13x = 39 \nDivide by 13: x = 3' },
+
+      // SECTION C: ADVANCED (31 - 45)
+      { id: 31, section: 'C', title: 'Advanced', equation: '3(x + 4) - 2(x + 1) = 17', answers: ['7'], prompt: 'Solve for x (watch the negative sign!):', steps: 'Expand: 3x + 12 - 2x - 2 = 17 \nCollect: x + 10 = 17 \nSubtract 10: x = 7' },
+      { id: 32, section: 'C', title: 'Advanced', equation: '5(x + 2) - 3(x - 4) = 34', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 5x + 10 - 3x + 12 = 34 \nCollect: 2x + 22 = 34 \nSubtract 22: 2x = 12 \nDivide by 2: x = 6' },
+      { id: 33, section: 'C', title: 'Advanced', equation: '4(2x + 3) - 2(3x - 1) = 26', answers: ['6'], prompt: 'Solve for x:', steps: 'Expand: 8x + 12 - 6x + 2 = 26 \nCollect: 2x + 14 = 26 \nSubtract 14: 2x = 12 \nDivide by 2: x = 6' },
+      { id: 34, section: 'C', title: 'Advanced', equation: '6(2x - 1) - 4(x + 3) = 20', answers: ['4.75', '19/4'], prompt: 'Solve for x (decimal or fraction):', steps: 'Expand: 12x - 6 - 4x - 12 = 20 \nCollect: 8x - 18 = 20 \nAdd 18: 8x = 38 \nDivide by 8: x = 4.75 (or 19/4)' },
+      { id: 35, section: 'C', title: 'Advanced', equation: '2(4x - 3) - 5(x - 2) = 25', answers: ['7'], prompt: 'Solve for x:', steps: 'Expand: 8x - 6 - 5x + 10 = 25 \nCollect: 3x + 4 = 25 \nSubtract 4: 3x = 21 \nDivide by 3: x = 7' },
+      { id: 36, section: 'C', title: 'Advanced', equation: '7(x + 2) - 3(2x - 5) = 31', answers: ['2'], prompt: 'Solve for x:', steps: 'Expand: 7x + 14 - 6x + 15 = 31 \nCollect: x + 29 = 31 \nSubtract 29: x = 2' },
+      { id: 37, section: 'C', title: 'Advanced', equation: '5(2x + 3) - 2(4x - 1) = 2(x + 8)', answers: ['no solution', 'none'], prompt: 'Solve for x (or type "no solution"):', steps: 'Expand: 10x + 15 - 8x + 2 = 2x + 16 \nCollect: 2x + 17 = 2x + 16 \nSubtract 2x: 17 = 16 (impossible!)\nAnswer: no solution' },
+      { id: 38, section: 'C', title: 'Advanced', equation: '3(3x - 2) - 4(2x - 5) = 2(x + 5)', answers: ['4'], prompt: 'Solve for x:', steps: 'Expand: 9x - 6 - 8x + 20 = 2x + 10 \nCollect: x + 14 = 2x + 10 \nSubtract x: 14 = x + 10 \nSubtract 10: x = 4' },
+      { id: 39, section: 'C', title: 'Advanced', equation: '2(5x - 3) - 3(2x - 4) = 4(x + 2) - 2', answers: ['all', 'infinite', 'all values', 'infinitely many'], prompt: 'Solve for x (or type "all values"):', steps: 'Expand: 10x - 6 - 6x + 12 = 4x + 8 - 2 \nCollect: 4x + 6 = 4x + 6 \nBoth sides identical!\nAnswer: all values of x (identity)' },
+      { id: 40, section: 'C', title: 'Advanced', equation: '3(4x - 1) = 2(3x + 4)', answers: ['11/6', '1.83', '1.833'], prompt: 'Solve for x (give fraction or 2 d.p.):', steps: 'Expand: 12x - 3 = 6x + 8 \nSubtract 6x: 6x - 3 = 8 \nAdd 3: 6x = 11 \nDivide by 6: x = 11/6' },
+      { id: 41, section: 'C', title: 'Advanced', equation: '5(2x - 3) = 4(3x - 1)', answers: ['-5.5', '-11/2'], prompt: 'Solve for x:', steps: 'Expand: 10x - 15 = 12x - 4 \nSubtract 10x: -15 = 2x - 4 \nAdd 4: -11 = 2x \nDivide by 2: x = -5.5' },
+      { id: 42, section: 'C', title: 'Advanced', equation: '4(x + 3) - 2(3x - 5) = 11', answers: ['5.5', '11/2'], prompt: 'Solve for x:', steps: 'Expand: 4x + 12 - 6x + 10 = 11 \nCollect: -2x + 22 = 11 \nSubtract 22: -2x = -11 \nDivide by -2: x = 5.5 (or 11/2)' },
+      { id: 43, section: 'C', title: 'Applied Word Problem', equation: '(x + 5) + 2(x + 1) + (2x + 3) = 40', answers: ['6'], prompt: 'A triangle has sides (x + 5), 2(x + 1), and (2x + 3). Perimeter is 40. Find x:', steps: 'Expand: x + 5 + 2x + 2 + 2x + 3 = 40 \nCollect: 5x + 10 = 40 \nSubtract 10: 5x = 30 \nDivide by 5: x = 6' },
+      { id: 44, section: 'C', title: 'Applied Word Problem', equation: '2[3(x + 2) + (2x + 1)] = 54', answers: ['4'], prompt: 'A rectangle has length 3(x + 2) and width (2x + 1). Perimeter is 54. Find x:', steps: 'Inside brackets: 3x + 6 + 2x + 1 = 5x + 7 \nMultiply by 2: 2(5x + 7) = 54 \n10x + 14 = 54 \nSubtract 14: 10x = 40 \nDivide by 10: x = 4' },
+      { id: 45, section: 'C', title: 'Applied Word Problem', equation: '3(2x - 1) = 2(4x - 5)', answers: ['3.5', '7/2'], prompt: 'An isosceles triangle has two equal sides: 3(2x - 1) and 2(4x - 5). Find the value of x:', steps: 'Equate sides: 3(2x - 1) = 2(4x - 5) \nExpand: 6x - 3 = 8x - 10 \nSubtract 6x: -3 = 2x - 10 \nAdd 10: 7 = 2x \nDivide by 2: x = 3.5' }
+    ];
+
+    // --- State & LocalStorage Management ---
+    const STORAGE_KEY = 'algebra_quiz_progress_v2';
+    
+    let state = {
+      currentIndex: 0,
+      userAnswers: {},     // { [qId]: { value: '', status: 'correct'|'wrong', score: 1|0 } }
+      revealedSteps: {}   // { [qId]: boolean }
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          state = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error("Storage write error:", e);
+      }
+    }
+
+    function resetAllProgress() {
+      if (confirm("Reset all 45 questions and erase your scores?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        state = { currentIndex: 0, userAnswers: {}, revealedSteps: {} };
+        saveState();
+        renderAll();
+      }
+    }
+
+    // --- Answer Matching Logic ---
+    function normalizeAnswer(str) {
+      if (!str) return '';
+      return str.toString().trim().toLowerCase().replace(/\s+/g, '').replace(/x=/g, '');
+    }
+
+    function isAnswerCorrect(input, allowedAnswers) {
+      const cleanInput = normalizeAnswer(input);
+      if (!cleanInput) return false;
+
+      // Handle simple fraction conversion if user enters decimal and answer is fraction or vice versa
+      let numericInput = NaN;
+      if (cleanInput.includes('/')) {
+        const parts = cleanInput.split('/');
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && Number(parts[1]) !== 0) {
+          numericInput = Number(parts[0]) / Number(parts[1]);
+        }
+      } else if (!isNaN(cleanInput)) {
+        numericInput = parseFloat(cleanInput);
+      }
+
+      for (let ans of allowedAnswers) {
+        const cleanAns = normalizeAnswer(ans);
+        if (cleanInput === cleanAns) return true;
+
+        // Try numeric comparison with tolerance
+        let numericAns = NaN;
+        if (cleanAns.includes('/')) {
+          const p = cleanAns.split('/');
+          numericAns = Number(p[0]) / Number(p[1]);
+        } else if (!isNaN(cleanAns)) {
+          numericAns = parseFloat(cleanAns);
+        }
+
+        if (!isNaN(numericInput) && !isNaN(numericAns)) {
+          if (Math.abs(numericInput - numericAns) < 0.02) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // --- DOM Elements ---
+    const qNumberDisplay = document.getElementById('qNumberDisplay');
+    const tierBadge = document.getElementById('tierBadge');
+    const currentSectionDesc = document.getElementById('currentSectionDesc');
+    const watermarkNum = document.getElementById('watermarkNum');
+    const qTag = document.getElementById('qTag');
+    const statusPill = document.getElementById('statusPill');
+    const qPrompt = document.getElementById('qPrompt');
+    const qMath = document.getElementById('qMath');
+    const qHintNote = document.getElementById('qHintNote');
+    const userInput = document.getElementById('userInput');
+    const answerForm = document.getElementById('answerForm');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const stepSolution = document.getElementById('stepSolution');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const toggleSolutionBtn = document.getElementById('toggleSolutionBtn');
+    const matrixContainer = document.getElementById('matrixContainer');
+    const headerScore = document.getElementById('headerScore');
+    const topProgressBar = document.getElementById('topProgressBar');
+    const matrixCompletion = document.getElementById('matrixCompletion');
+    const resetBtn = document.getElementById('resetBtn');
+    const resumeNextBtn = document.getElementById('resumeNextBtn');
+
+    // --- Render Functions ---
+    function renderQuestion(index) {
+      const q = QUESTIONS[index];
+      state.currentIndex = index;
+      saveState();
+
+      qNumberDisplay.textContent = q.id;
+      watermarkNum.textContent = `#${q.id < 10 ? '0' + q.id : q.id}`;
+      qPrompt.textContent = q.prompt;
+      qMath.textContent = q.equation;
+      qTag.textContent = `${q.title} Equation`;
+
+      // Set section badges
+      if (q.section === 'A') {
+        tierBadge.textContent = 'Section A: Foundational';
+        tierBadge.className = 'text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        currentSectionDesc.textContent = 'Single brackets & basic inverses';
+      } else if (q.section === 'B') {
+        tierBadge.textContent = 'Section B: Intermediate';
+        tierBadge.className = 'text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+        currentSectionDesc.textContent = 'Variables on both sides & combined terms';
+      } else {
+        tierBadge.textContent = 'Section C: Advanced & Applied';
+        tierBadge.className = 'text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30';
+        currentSectionDesc.textContent = 'Subtracted brackets & geometric word problems';
+      }
+
+      // Check current question answer state
+      const record = state.userAnswers[q.id];
+      if (record) {
+        userInput.value = record.value || '';
+        showFeedback(record.status === 'correct', record.value);
+        if (record.status === 'correct') {
+          statusPill.textContent = 'Solved';
+          statusPill.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        } else {
+          statusPill.textContent = 'Needs Review';
+          statusPill.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        }
+      } else {
+        userInput.value = '';
+        hideFeedback();
+        statusPill.textContent = 'Not Answered';
+        statusPill.className = 'text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+      }
+
+      // Solutions reveal button state
+      stepSolution.textContent = q.steps;
+      if (state.revealedSteps[q.id]) {
+        stepSolution.classList.remove('hidden');
+        toggleSolutionBtn.textContent = 'Hide Step-by-Step Working';
+      } else {
+        stepSolution.classList.add('hidden');
+        toggleSolutionBtn.textContent = 'Show Step-by-Step Working';
+      }
+
+      // Navigation arrows
+      prevBtn.disabled = (index === 0);
+      nextBtn.disabled = (index === QUESTIONS.length - 1);
+
+      updateStats();
+      renderMatrix();
+      userInput.focus();
+    }
+
+    function showFeedback(isCorrect, valueEntered) {
+      feedbackBox.classList.remove('hidden');
+      if (isCorrect) {
+        feedbackBox.className = 'rounded-2xl p-4 border bg-emerald-950/40 border-emerald-500/40 text-emerald-200 flex items-start gap-3';
+        feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+        feedbackTitle.textContent = 'Spot on! Correct answer.';
+        feedbackTitle.className = 'font-bold text-sm sm:text-base text-emerald-300';
+        feedbackMessage.textContent = `You entered "${valueEntered}". Great work! Click "Next" to continue.`;
+      } else {
+        feedbackBox.className = 'rounded-2xl p-4 border bg-rose-950/40 border-rose-500/40 text-rose-200 flex items-start gap-3';
+        feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+        feedbackTitle.textContent = 'Not quite right';
+        feedbackTitle.className = 'font-bold text-sm sm:text-base text-rose-300';
+        feedbackMessage.textContent = `Check your signs when expanding or balancing terms, or tap "Show Step-by-Step Working" below.`;
+      }
+    }
+
+    function hideFeedback() {
+      feedbackBox.classList.add('hidden');
+    }
+
+    function updateStats() {
+      const correctCount = Object.values(state.userAnswers).filter(a => a.status === 'correct').length;
+      const total = QUESTIONS.length;
+      headerScore.textContent = `${correctCount} / ${total}`;
+      const percentage = Math.round((correctCount / total) * 100);
+      topProgressBar.style.width = `${percentage}%`;
+      matrixCompletion.textContent = `${correctCount}/${total}`;
+
+      // Check if finished
+      if (correctCount === 45) {
+        setTimeout(() => {
+          document.getElementById('finishModal').classList.remove('hidden');
+          confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        }, 500);
+      }
+    }
+
+    function renderMatrix() {
+      matrixContainer.innerHTML = '';
+      const sections = [
+        { key: 'A', name: 'Section A (1-15)', range: [0, 15] },
+        { key: 'B', name: 'Section B (16-30)', range: [15, 30] },
+        { key: 'C', name: 'Section C (31-45)', range: [30, 45] }
+      ];
+
+      sections.forEach(sec => {
+        const secWrap = document.createElement('div');
+        const header = document.createElement('div');
+        header.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2';
+        header.textContent = sec.name;
+        secWrap.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-5 gap-1.5';
+
+        for (let i = sec.range[0]; i < sec.range[1]; i++) {
+          const q = QUESTIONS[i];
+          const rec = state.userAnswers[q.id];
+          const isActive = (i === state.currentIndex);
+
+          const btn = document.createElement('button');
+          btn.className = 'h-8 text-xs font-semibold rounded-lg transition-all flex items-center justify-center relative ';
+          btn.textContent = q.id;
+
+          if (isActive) {
+            btn.className += 'ring-2 ring-indigo-400 bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/40 ';
+          } else if (rec && rec.status === 'correct') {
+            btn.className += 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/50 ';
+          } else if (rec && rec.status === 'wrong') {
+            btn.className += 'bg-rose-600/30 text-rose-300 border border-rose-500/40 hover:bg-rose-600/50 ';
+          } else {
+            btn.className += 'bg-slate-800/80 text-slate-400 border border-slate-700/60 hover:bg-slate-700/80 hover:text-slate-200 ';
+          }
+
+          btn.onclick = () => renderQuestion(i);
+          grid.appendChild(btn);
+        }
+
+        secWrap.appendChild(grid);
+        matrixContainer.appendChild(secWrap);
+      });
+    }
+
+    // --- Form Submission & Check ---
+    answerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = userInput.value.trim();
+      if (!val) return;
+
+      const q = QUESTIONS[state.currentIndex];
+      const correct = isAnswerCorrect(val, q.answers);
+
+      state.userAnswers[q.id] = {
+        value: val,
+        status: correct ? 'correct' : 'wrong',
+        score: correct ? 1 : 0
+      };
+      saveState();
+
+      showFeedback(correct, val);
+
+      if (correct) {
+        confetti({
+          particleCount: 40,
+          spread: 50,
+          origin: { y: 0.7 }
+        });
+      }
+
+      updateStats();
+      renderMatrix();
+    });
+
+    // --- Navigation Handlers ---
+    prevBtn.onclick = () => {
+      if (state.currentIndex > 0) {
+        renderQuestion(state.currentIndex - 1);
+      }
+    };
+
+    nextBtn.onclick = () => {
+      if (state.currentIndex < QUESTIONS.length - 1) {
+        renderQuestion(state.currentIndex + 1);
+      }
+    };
+
+    toggleSolutionBtn.onclick = () => {
+      const q = QUESTIONS[state.currentIndex];
+      state.revealedSteps[q.id] = !state.revealedSteps[q.id];
+      saveState();
+      if (state.revealedSteps[q.id]) {
+        stepSolution.classList.remove('hidden');
+        toggleSolutionBtn.textContent = 'Hide Step-by-Step Working';
+      } else {
+        stepSolution.classList.add('hidden');
+        toggleSolutionBtn.textContent = 'Show Step-by-Step Working';
+      }
+    };
+
+    resetBtn.onclick = resetAllProgress;
+
+    resumeNextBtn.onclick = () => {
+      // Find the first question that has not been answered correctly
+      const firstUnsolved = QUESTIONS.findIndex(q => {
+        const record = state.userAnswers[q.id];
+        return !record || record.status !== 'correct';
+      });
+
+      if (firstUnsolved !== -1) {
+        renderQuestion(firstUnsolved);
+      } else {
+        alert("You have solved all 45 questions! Awesome job!");
+      }
+    };
+
+    // Keyboard Shortcuts (Arrow keys to navigate)
+    document.addEventListener('keydown', (e) => {
+      if (e.target === userInput) return; // Allow typing without triggering hotkeys
+      if (e.key === 'ArrowLeft' && state.currentIndex > 0) {
+        renderQuestion(state.currentIndex - 1);
+      } else if (e.key === 'ArrowRight' && state.currentIndex < QUESTIONS.length - 1) {
+        renderQuestion(state.currentIndex + 1);
+      }
+    });
+
+    // --- Init ---
+    function renderAll() {
+      loadState();
+      renderQuestion(state.currentIndex || 0);
+      updateStats();
+      renderMatrix();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
